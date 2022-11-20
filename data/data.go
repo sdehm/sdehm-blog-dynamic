@@ -17,6 +17,12 @@ type DataMock struct {
 	posts map[string]models.Post
 }
 
+func NewDataMock() *DataMock {
+	return &DataMock{
+		posts: map[string]models.Post{},
+	}
+}
+
 func (d *DataMock) GetComment(id int) (*models.Comment, error) {
 	for _, p := range d.posts {
 		for _, c := range p.Comments {
@@ -33,7 +39,13 @@ func (d *DataMock) GetPost(path string) (models.Post, error) {
 }
 
 func (d *DataMock) AddComment(p string, c models.Comment) error {
-	post := d.posts[p]
+	post, ok := d.posts[p]
+	if !ok {
+		d.posts[p] = models.Post{
+			Path:     p,
+			Comments: []models.Comment{c},
+		}
+	}
 	post.Comments = append(post.Comments, c)
 	d.posts[p] = post
 	return nil

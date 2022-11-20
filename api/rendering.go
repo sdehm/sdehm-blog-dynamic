@@ -17,9 +17,9 @@ func RenderComment(c models.Comment) string {
 }
 
 func RenderPostComments(p models.Post) string {
-	var html string
+	var html string = "<div class=\"comments\">"
 	for _, c := range p.Comments {
 		html += RenderComment(c)
 	}
-	return html
+	return html + "</div>"
 }
