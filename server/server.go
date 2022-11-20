@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -7,18 +7,20 @@ import (
 	"net/http"
 
 	"github.com/gobwas/ws"
+	"github.com/sdehm/sdehm-blog-dynamic/api"
+	"github.com/sdehm/sdehm-blog-dynamic/data"
 )
 
-type server struct {
+type Server struct {
 	logger            *log.Logger
-	repo 							repo
+	repo 							data.Repo
 	connections       []*connection
 	connectionUpdates chan func()
 	lastId            int
 }
 
-func start(addr string, logger *log.Logger, repo repo) error {
-	server := &server{
+func Start(addr string, logger *log.Logger, repo data.Repo) error {
+	server := &Server{
 		logger:            logger,
 		repo: 							repo,
 		connectionUpdates: make(chan func()),
@@ -30,7 +32,7 @@ func start(addr string, logger *log.Logger, repo repo) error {
 	return http.ListenAndServe(addr, nil)
 }
 
-func (s *server) wsHandler() http.HandlerFunc {
+func (s *Server) wsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		s.logger.Println("new connection")
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
@@ -41,7 +43,7 @@ func (s *server) wsHandler() http.HandlerFunc {
 	}
 }
 
-func (s *server) addConnection(c net.Conn) {
+func (s *Server) addConnection(c net.Conn) {
 	s.connectionUpdates <- func() {
 		s.lastId++
 		conn := &connection{
@@ -55,7 +57,7 @@ func (s *server) addConnection(c net.Conn) {
 	}
 }
 
-func (s *server) removeConnection(c *connection) {
+func (s *Server) removeConnection(c *connection) {
 	s.connectionUpdates <- func() {
 		for i, con := range s.connections {
 			if con.id == c.id {
@@ -66,13 +68,13 @@ func (s *server) removeConnection(c *connection) {
 	}
 }
 
-func (s *server) startConnectionUpdates() {
+func (s *Server) startConnectionUpdates() {
 	for u := range s.connectionUpdates {
 		u()
 	}
 }
 
-func (s *server) broadcast(m message) {
+func (s *Server) broadcast(m api.Message) {
 	for _, c := range s.connections {
 		err := c.send(m)
 		if err != nil {

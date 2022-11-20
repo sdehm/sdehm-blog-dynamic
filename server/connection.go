@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/gobwas/ws/wsutil"
+	"github.com/sdehm/sdehm-blog-dynamic/api"
 )
 
 
@@ -15,15 +16,15 @@ type connection struct {
 }
 
 func (c *connection) sendConnected(id string) {
-	c.send(connectionId(id))
+	c.send(api.ConnectionId(id))
 }
 
 // Serialize the data to JSON and send it to the client
-func (c *connection) send(m message) error {
+func (c *connection) send(m api.Message) error {
 	if c.conn == nil {
 		return fmt.Errorf("connection is nil")
 	}
-	data, err := m.marshal()
+	data, err := m.Marshal()
 	if err != nil {
 		return err
 	}
@@ -36,7 +37,7 @@ func (c *connection) send(m message) error {
 	return nil
 }
 
-func (c *connection) receiver(s *server) {
+func (c *connection) receiver(s *Server) {
 	for {
 		data, _, err := wsutil.ReadClientData(c.conn)
 		if err != nil {

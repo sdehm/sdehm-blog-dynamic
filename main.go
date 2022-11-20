@@ -1,10 +1,15 @@
 package main
 
-import "log"
+import (
+	"log"
+
+	"github.com/sdehm/sdehm-blog-dynamic/data"
+	"github.com/sdehm/sdehm-blog-dynamic/server"
+)
 
 func main() {
 		println("Hello, World!")
 		logger := log.New(log.Writer(), "server: ", log.Flags())
-		repo := &dataMock{}
-		start(":8080", logger, repo)
+		repo := &data.DataMock{}
+		server.Start(":8080", logger, repo)
 }
