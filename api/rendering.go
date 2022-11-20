@@ -18,7 +18,7 @@ const commentTemplate = `<div>
 </div>`
 
 const postTemplate = `<div>
-<p>New Comment:</p>
+<p>Comments</p>
 <form id="comment-form" class="w-full max-w-xs" action="#">
 	<div class="form-control">
 		<label class="label block text-sm mb-1 text-neutral-500 dark:text-neutral-400">
@@ -37,11 +37,8 @@ const postTemplate = `<div>
 		<button class="border-2 border-neutral-300 dark:border-neutral-600 font-bold py-2 px-2 rounded hover:border-4 mb-2">Submit</button>
 	</div>
 </form>
-<hr class="border-dotted border-neutral-300 dark:border-neutral-600">
-<p>Comments:</p>
 <div id="comments" class="comments">
 %s
-</div>
 </div>`
 
 func RenderComment(c models.Comment) string {
