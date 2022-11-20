@@ -54,7 +54,8 @@ func (c *connection) receiver(s *Server) {
 			Comment string `json:"comment"`
 		}{}
 		err = json.Unmarshal(data, &commentData)
-		if err != nil {
+		if err != nil || commentData.Type != "comment" {
+			s.logger.Println("Invalid data received from client")
 			return
 		}
 		comment, err := s.repo.AddComment(c.path, commentData.Author, commentData.Comment)
