@@ -6,10 +6,36 @@ import (
 	"github.com/sdehm/sdehm-blog-dynamic/models"
 )
 
-const commentTemplate = `<div id="comment_%d" class="comment">
+const commentTemplate = `<hr class="border-dotted border-neutral-300 dark:border-neutral-600">
+<div id="comment_%d" class="comment">
 	<div class="comment-author"> %s </div>
-	<div class="comment-date"> %s </div>
+	<div class="comment-date mt-[0.1rem] text-xs text-neutral-500 dark:text-neutral-400"> %s </div>
 	<div class="comment-body"> %s </div>
+</div>`
+
+const postTemplate = `<div class="comments">
+<p>New Comment:</p>
+<form id="comment-form" class="w-full max-w-xs" action="#">
+	<div class="form-control">
+		<label class="label block text-sm mb-1 text-neutral-500 dark:text-neutral-400">
+			<span class="label-text">Name</span>
+		</label>
+		<input type="text" placeholder="Name" name="name" class="rounded bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent">
+	</div>
+	<div class="form-control">
+
+		<label class="label block text-sm mb-1 text-neutral-500 dark:text-neutral-400">
+			<span class="label-text">Comment</span>
+		</label>
+		<textarea name="comment" class="rounded bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent h-24 w-full" placeholder="Comment"></textarea>
+	</div>
+	<div class="form-control">
+		<button class="border-2 border-neutral-300 dark:border-neutral-600 font-bold py-2 px-2 rounded hover:border-4 mb-2">Submit</button>
+	</div>
+</form>
+<hr class="border-dotted border-neutral-300 dark:border-neutral-600">
+<p>Comments:</p>
+%s
 </div>`
 
 func RenderComment(c models.Comment) string {
@@ -17,9 +43,9 @@ func RenderComment(c models.Comment) string {
 }
 
 func RenderPostComments(p models.Post) string {
-	var html string = "<div class=\"comments\">"
+	var html string
 	for _, c := range p.Comments {
 		html += RenderComment(c)
 	}
-	return html + "</div>"
+	return fmt.Sprintf(postTemplate, html)
 }
