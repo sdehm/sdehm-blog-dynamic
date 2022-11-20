@@ -34,26 +34,29 @@ func Start(addr string, logger *log.Logger, repo data.Repo) error {
 
 func (s *Server) wsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		s.logger.Println("new connection")
+		queryParams := r.URL.Query()
+		path := queryParams.Get("path")
+		s.logger.Println("path:", path)
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
-		s.addConnection(conn)
+		s.addConnection(conn, path)
 		if err != nil {
 			panic(err)
 		}
 	}
 }
 
-func (s *Server) addConnection(c net.Conn) {
+func (s *Server) addConnection(c net.Conn, path string) {
 	s.connectionUpdates <- func() {
 		s.lastId++
 		conn := &connection{
 			id:   s.lastId,
 			conn: c,
+			path: path,
 		}
 		go conn.receiver(s)
 		s.connections = append(s.connections, conn)
 		id := fmt.Sprint(conn.id)
-		comments, err := s.repo.GetPost("/")
+		comments, err := s.repo.GetPost(path)
 		if err != nil {
 			s.logger.Println(err)
 			return
@@ -80,8 +83,11 @@ func (s *Server) startConnectionUpdates() {
 	}
 }
 
-func (s *Server) broadcast(m api.Message) {
+func (s *Server) broadcast(m api.Message, path string) {
 	for _, c := range s.connections {
+		if c.path != path {
+			continue
+		}
 		err := c.send(m)
 		if err != nil {
 			s.logger.Println(err)

@@ -12,6 +12,7 @@ import (
 type connection struct {
 	id   int
 	conn net.Conn
+	path string
 }
 
 // Send a message to the client to indicate that the connection was successful
@@ -47,19 +48,25 @@ func (c *connection) receiver(s *Server) {
 			return
 		}
 
-		xy := struct {
-			X  int    `json:"x"`
-			Y  int    `json:"y"`
-			Id string `json:"id"`
+		commentData := struct {
+			Type string `json:"type"`
+			Author  string    `json:"author"`
+			Comment  string    `json:"comment"`
 		}{}
-		err = json.Unmarshal(data, &xy)
+		err = json.Unmarshal(data, &commentData)
 		if err != nil {
 			return
 		}
-
-		// s.broadcast(morphData{
-		// 	Id:   "cursor_" + xy.Id,
-		// 	Html: fmt.Sprintf("<div id=\"cursor_%s\" class=\"cursor\" style=\"--x: %d; --y: %d;\">%[1]s</div>", xy.Id, xy.X, xy.Y),
-		// })
+		s.logger.Println("comment:", commentData)
+		comment, err := s.repo.AddComment(c.path, commentData.Author, commentData.Comment)
+		if err != nil {
+			s.logger.Println(err)
+			return
+		}
+		s.broadcast(&api.MorphData{
+			Type: "prepend",
+			Id:   "comments",
+			Html: api.RenderComment(comment),
+		}, c.path)
 	}
 }

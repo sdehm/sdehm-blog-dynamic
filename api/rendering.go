@@ -6,14 +6,18 @@ import (
 	"github.com/sdehm/sdehm-blog-dynamic/models"
 )
 
-const commentTemplate = `<hr class="border-dotted border-neutral-300 dark:border-neutral-600">
+const commentTemplate = `<div>
+<hr class="border-dotted border-neutral-300 dark:border-neutral-600">
 <div id="comment_%d" class="comment">
-	<div class="comment-author"> %s </div>
-	<div class="comment-date mt-[0.1rem] text-xs text-neutral-500 dark:text-neutral-400"> %s </div>
+	<div class="comment-author font-bold text-xs text-neutral-500 dark:text-neutral-400"> %s </div>
+	<span class="comment-date mt-[0.1rem] text-xs text-neutral-500 dark:text-neutral-400"> 
+	  <time datetime="%[3]s"> %[3]s </time> 
+	</span>
 	<div class="comment-body"> %s </div>
+</div>
 </div>`
 
-const postTemplate = `<div class="comments">
+const postTemplate = `<div>
 <p>New Comment:</p>
 <form id="comment-form" class="w-full max-w-xs" action="#">
 	<div class="form-control">
@@ -35,7 +39,9 @@ const postTemplate = `<div class="comments">
 </form>
 <hr class="border-dotted border-neutral-300 dark:border-neutral-600">
 <p>Comments:</p>
+<div id="comments" class="comments">
 %s
+</div>
 </div>`
 
 func RenderComment(c models.Comment) string {
@@ -45,7 +51,8 @@ func RenderComment(c models.Comment) string {
 func RenderPostComments(p models.Post) string {
 	var html string
 	for _, c := range p.Comments {
-		html += RenderComment(c)
+		// prepend rendered comment to html
+		html = RenderComment(c) + html
 	}
 	return fmt.Sprintf(postTemplate, html)
 }

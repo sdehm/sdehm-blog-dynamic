@@ -1,6 +1,8 @@
 package data
 
 import (
+	"time"
+
 	"github.com/sdehm/sdehm-blog-dynamic/models"
 )
 
@@ -8,7 +10,7 @@ import (
 type Repo interface {
 	GetComment(id int) (*models.Comment, error)
 	GetPost(path string) (models.Post, error)
-	AddComment(string, models.Comment) error
+	AddComment(string, string, string) (models.Comment, error)
 	DeleteComment(id int) error
 }
 
@@ -38,7 +40,13 @@ func (d *DataMock) GetPost(path string) (models.Post, error) {
 	return d.posts[path], nil
 }
 
-func (d *DataMock) AddComment(p string, c models.Comment) error {
+func (d *DataMock) AddComment(p string, author string, body string) (models.Comment, error) {
+	c := models.Comment{
+		Id:       len(d.posts[p].Comments) + 1,
+		Author:  author,
+		Body: body,
+		Timestamp: 	time.Now(),
+	}
 	post, ok := d.posts[p]
 	if !ok {
 		d.posts[p] = models.Post{
@@ -48,7 +56,7 @@ func (d *DataMock) AddComment(p string, c models.Comment) error {
 	}
 	post.Comments = append(post.Comments, c)
 	d.posts[p] = post
-	return nil
+	return c, nil
 }
 
 func (d *DataMock) DeleteComment(id int) error {

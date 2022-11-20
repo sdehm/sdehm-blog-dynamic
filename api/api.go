@@ -14,7 +14,6 @@ type MorphData struct {
 }
 
 func (m *MorphData) Marshal() ([]byte, error) {
-	m.Type = "morph"
 	return json.Marshal(m)
 }
 
