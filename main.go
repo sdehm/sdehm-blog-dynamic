@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-	println("Hello, World!")
 	logger := log.New(log.Writer(), "server: ", log.Flags())
 	repo := data.NewDataMock()
 	server.Start(":8080", logger, repo)

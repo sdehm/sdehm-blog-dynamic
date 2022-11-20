@@ -20,15 +20,15 @@ type Server struct {
 }
 
 func Start(addr string, logger *log.Logger, repo data.Repo) error {
-	server := &Server{
+	s := &Server{
 		logger:            logger,
 		repo:              repo,
 		connectionUpdates: make(chan func()),
 	}
-	http.Handle("/ws", server.wsHandler())
+	http.Handle("/ws", s.wsHandler())
 
-	go server.startConnectionUpdates()
-
+	go s.startConnectionUpdates()
+	s.logger.Printf("Listening on %s", addr)
 	return http.ListenAndServe(addr, nil)
 }
 
@@ -36,7 +36,6 @@ func (s *Server) wsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		queryParams := r.URL.Query()
 		path := queryParams.Get("path")
-		s.logger.Println("path:", path)
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
 		s.addConnection(conn, path)
 		if err != nil {
@@ -63,6 +62,7 @@ func (s *Server) addConnection(c net.Conn, path string) {
 		}
 		commentsHtml := api.RenderPostComments(comments)
 		conn.sendConnected(id, commentsHtml)
+		s.logger.Printf("New connection: %s", id)
 	}
 }
 
@@ -71,6 +71,7 @@ func (s *Server) removeConnection(c *connection) {
 		for i, con := range s.connections {
 			if con.id == c.id {
 				s.connections = append(s.connections[:i], s.connections[i+1:]...)
+				s.logger.Printf("Connection closed: %d", c.id)
 				return
 			}
 		}

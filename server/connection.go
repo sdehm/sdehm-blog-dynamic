@@ -57,7 +57,6 @@ func (c *connection) receiver(s *Server) {
 		if err != nil {
 			return
 		}
-		s.logger.Println("comment:", commentData)
 		comment, err := s.repo.AddComment(c.path, commentData.Author, commentData.Comment)
 		if err != nil {
 			s.logger.Println(err)
