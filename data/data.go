@@ -7,7 +7,7 @@ import (
 // Repo interface
 type Repo interface {
 	GetComment(id int) (*models.Comment, error)
-	GetPostComments(path string) ([]models.Comment, error)
+	GetPost(path string) (models.Post, error)
 	AddComment(string, models.Comment) error
 	DeleteComment(id int) error
 }
@@ -28,8 +28,8 @@ func (d *DataMock) GetComment(id int) (*models.Comment, error) {
 	return nil, nil
 }
 
-func (d *DataMock) GetPostComments(path string) ([]models.Comment, error) {
-	return d.posts[path].Comments, nil
+func (d *DataMock) GetPost(path string) (models.Post, error) {
+	return d.posts[path], nil
 }
 
 func (d *DataMock) AddComment(p string, c models.Comment) error {

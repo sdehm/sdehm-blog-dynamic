@@ -16,12 +16,11 @@ func (m *MorphData) Marshal() ([]byte, error) {
 	return json.Marshal(m)
 }
 
-type ConnectionId string
+type Connected struct {
+	ConnectionId int `json:"connection_id"`
+	Html string `json:"html"`
+}
 
-func (m ConnectionId) Marshal() ([]byte, error) {
-	return json.Marshal(struct {
-		Id ConnectionId `json:"id"`
-	}{
-		Id: m,
-	})
+func (c *Connected) Marshal() ([]byte, error) {
+	return json.Marshal(c)
 }

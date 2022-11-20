@@ -53,7 +53,13 @@ func (s *Server) addConnection(c net.Conn) {
 		go conn.receiver(s)
 		s.connections = append(s.connections, conn)
 		id := fmt.Sprint(conn.id)
-		conn.sendConnected(id)
+		comments, err := s.repo.GetPost("/")
+		if err != nil {
+			s.logger.Println(err)
+			return
+		}
+		commentsHtml := api.RenderPostComments(comments)
+		conn.sendConnected(id, commentsHtml)
 	}
 }
 

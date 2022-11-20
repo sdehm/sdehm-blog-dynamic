@@ -14,8 +14,12 @@ type connection struct {
 	conn net.Conn
 }
 
-func (c *connection) sendConnected(id string) {
-	c.send(api.ConnectionId(id))
+// Send a message to the client to indicate that the connection was successful
+func (c *connection) sendConnected(id string, commentsHtml string) {
+	c.send(&api.Connected{
+		ConnectionId: c.id,
+		Html:         commentsHtml,
+	})
 }
 
 // Serialize the data to JSON and send it to the client
