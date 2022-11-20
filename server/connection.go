@@ -45,7 +45,7 @@ func (c *connection) receiver(s *Server) {
 	for {
 		data, _, err := wsutil.ReadClientData(c.conn)
 		if err != nil {
-			return
+			continue
 		}
 
 		commentData := struct {
@@ -56,12 +56,12 @@ func (c *connection) receiver(s *Server) {
 		err = json.Unmarshal(data, &commentData)
 		if err != nil || commentData.Type != "comment" {
 			s.logger.Println("Invalid data received from client")
-			return
+			continue
 		}
 		comment, err := s.repo.AddComment(c.path, commentData.Author, commentData.Comment)
 		if err != nil {
 			s.logger.Println(err)
-			return
+			continue
 		}
 		s.broadcast(&api.MorphData{
 			Type: "prepend",
