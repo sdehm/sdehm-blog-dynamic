@@ -24,7 +24,7 @@ const postTemplate = `<div>
 		<label class="label block text-sm mb-1 text-neutral-500 dark:text-neutral-400">
 			<span class="label-text">Name</span>
 		</label>
-		<input type="text" placeholder="Name" name="name" class="rounded bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent">
+		<input required type="text" placeholder="Name" name="name" class="rounded bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent">
 	</div>
 	<div class="form-control">
 
@@ -34,7 +34,7 @@ const postTemplate = `<div>
 		<textarea required name="comment" class="rounded bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent h-24 w-full" placeholder="Comment"></textarea>
 	</div>
 	<div class="form-control">
-		<button required class="border-2 border-neutral-300 dark:border-neutral-600 font-bold py-2 px-2 rounded hover:border-4 mb-2">Submit</button>
+		<button class="border-2 border-neutral-300 dark:border-neutral-600 font-bold py-2 px-2 rounded hover:border-4 mb-2">Submit</button>
 	</div>
 </form>
 <div id="comments" class="comments">
