@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-		println("Hello, World!")
-		logger := log.New(log.Writer(), "server: ", log.Flags())
-		repo := &data.DataMock{}
-		server.Start(":8080", logger, repo)
+	println("Hello, World!")
+	logger := log.New(log.Writer(), "server: ", log.Flags())
+	repo := &data.DataMock{}
+	server.Start(":8080", logger, repo)
 }

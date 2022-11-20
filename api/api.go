@@ -19,7 +19,7 @@ func (m *MorphData) Marshal() ([]byte, error) {
 type ConnectionId string
 
 func (m ConnectionId) Marshal() ([]byte, error) {
-	return json.Marshal( struct {
+	return json.Marshal(struct {
 		Id ConnectionId `json:"id"`
 	}{
 		Id: m,

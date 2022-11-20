@@ -13,7 +13,7 @@ import (
 
 type Server struct {
 	logger            *log.Logger
-	repo 							data.Repo
+	repo              data.Repo
 	connections       []*connection
 	connectionUpdates chan func()
 	lastId            int
@@ -22,7 +22,7 @@ type Server struct {
 func Start(addr string, logger *log.Logger, repo data.Repo) error {
 	server := &Server{
 		logger:            logger,
-		repo: 							repo,
+		repo:              repo,
 		connectionUpdates: make(chan func()),
 	}
 	http.Handle("/ws", server.wsHandler())

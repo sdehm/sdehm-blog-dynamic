@@ -9,7 +9,6 @@ import (
 	"github.com/sdehm/sdehm-blog-dynamic/api"
 )
 
-
 type connection struct {
 	id   int
 	conn net.Conn

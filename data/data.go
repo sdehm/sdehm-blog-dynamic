@@ -13,7 +13,7 @@ type Repo interface {
 }
 
 // mock implementation of the data interface for testing
-type DataMock struct { 
+type DataMock struct {
 	posts map[string]models.Post
 }
 
