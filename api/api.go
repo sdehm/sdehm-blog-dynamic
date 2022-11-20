@@ -18,9 +18,9 @@ func (m *MorphData) Marshal() ([]byte, error) {
 }
 
 type Connected struct {
-	Type string `json:"type"`
-	ConnectionId int `json:"connection_id"`
-	Html string `json:"html"`
+	Type         string `json:"type"`
+	ConnectionId int    `json:"connection_id"`
+	Html         string `json:"html"`
 }
 
 func (c *Connected) Marshal() ([]byte, error) {

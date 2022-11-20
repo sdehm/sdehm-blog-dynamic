@@ -49,9 +49,9 @@ func (c *connection) receiver(s *Server) {
 		}
 
 		commentData := struct {
-			Type string `json:"type"`
-			Author  string    `json:"author"`
-			Comment  string    `json:"comment"`
+			Type    string `json:"type"`
+			Author  string `json:"author"`
+			Comment string `json:"comment"`
 		}{}
 		err = json.Unmarshal(data, &commentData)
 		if err != nil {

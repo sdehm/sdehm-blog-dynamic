@@ -42,10 +42,10 @@ func (d *DataMock) GetPost(path string) (models.Post, error) {
 
 func (d *DataMock) AddComment(p string, author string, body string) (models.Comment, error) {
 	c := models.Comment{
-		Id:       len(d.posts[p].Comments) + 1,
-		Author:  author,
-		Body: body,
-		Timestamp: 	time.Now().UTC(),
+		Id:        len(d.posts[p].Comments) + 1,
+		Author:    author,
+		Body:      body,
+		Timestamp: time.Now().UTC(),
 	}
 	post, ok := d.posts[p]
 	if !ok {
