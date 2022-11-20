@@ -70,7 +70,7 @@ func (s *server) startConnectionUpdates() {
 	}
 }
 
-func (s *server) broadcast(m *morphData) {
+func (s *server) broadcast(m message) {
 	for _, c := range s.connections {
 		err := c.send(m)
 		if err != nil {

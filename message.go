@@ -25,8 +25,3 @@ func (m connectionId) marshal() ([]byte, error) {
 		Id: m,
 	})
 }
-
-type comment struct {
-	Comment string `json:"comment"`
-	Author  string `json:"author"`
-}
