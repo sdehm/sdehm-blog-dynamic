@@ -11,14 +11,16 @@ import (
 
 type server struct {
 	logger            *log.Logger
+	repo 							repo
 	connections       []*connection
 	connectionUpdates chan func()
 	lastId            int
 }
 
-func start(addr string, logger *log.Logger) error {
+func start(addr string, logger *log.Logger, repo repo) error {
 	server := &server{
 		logger:            logger,
+		repo: 							repo,
 		connectionUpdates: make(chan func()),
 	}
 	http.Handle("/ws", server.wsHandler())
