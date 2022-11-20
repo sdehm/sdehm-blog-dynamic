@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net"
 
 	"github.com/gobwas/ws/wsutil"
@@ -58,7 +59,7 @@ func (c *connection) receiver(s *Server) {
 			s.logger.Println("Invalid data received from client")
 			continue
 		}
-		comment, err := s.repo.AddComment(c.path, commentData.Author, commentData.Comment)
+		comment, err := s.repo.AddComment(c.path, sanitize(commentData.Author), sanitize(commentData.Comment))
 		if err != nil {
 			s.logger.Println(err)
 			continue
@@ -69,4 +70,9 @@ func (c *connection) receiver(s *Server) {
 			Html: api.RenderComment(comment),
 		}, c.path)
 	}
+}
+
+// Strip out html to sanitize the inputs
+func sanitize(s string) string {
+	return template.HTMLEscapeString(s)
 }
