@@ -11,7 +11,7 @@ const commentTemplate = `<div>
 <div id="comment_%d" class="comment">
 	<div class="comment-author font-bold text-xs text-neutral-500 dark:text-neutral-400"> %s </div>
 	<span class="comment-date mt-[0.1rem] text-xs text-neutral-500 dark:text-neutral-400"> 
-	  <time datetime="%[3]s"> %[3]s </time> 
+	  <time datetime="%s"> %s </time> 
 	</span>
 	<div class="comment-body"> %s </div>
 </div>
@@ -45,7 +45,8 @@ const postTemplate = `<div>
 </div>`
 
 func RenderComment(c models.Comment) string {
-	return fmt.Sprintf(commentTemplate, c.Id, c.Author, c.Timestamp, c.Body)
+	tf := c.Timestamp.Format("2 January 2006")
+	return fmt.Sprintf(commentTemplate, c.Id, c.Author, c.Timestamp, tf, c.Body)
 }
 
 func RenderPostComments(p models.Post) string {

@@ -45,7 +45,7 @@ func (d *DataMock) AddComment(p string, author string, body string) (models.Comm
 		Id:       len(d.posts[p].Comments) + 1,
 		Author:  author,
 		Body: body,
-		Timestamp: 	time.Now(),
+		Timestamp: 	time.Now().UTC(),
 	}
 	post, ok := d.posts[p]
 	if !ok {
