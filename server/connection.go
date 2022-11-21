@@ -43,9 +43,14 @@ func (c *connection) send(m api.Message) error {
 }
 
 func (c *connection) receiver(s *Server) {
+	defer c.conn.Close()
+	
 	for {
+		// wait for semaphore availability
+		s.receiveSemaphore <- struct{}{}
 		data, _, err := wsutil.ReadClientData(c.conn)
 		if err != nil {
+			<-s.receiveSemaphore
 			continue
 		}
 
@@ -57,18 +62,21 @@ func (c *connection) receiver(s *Server) {
 		err = json.Unmarshal(data, &commentData)
 		if err != nil || commentData.Type != "comment" {
 			s.logger.Println("Invalid data received from client")
+			<-s.receiveSemaphore
 			continue
 		}
 		comment, err := s.repo.AddComment(c.path, sanitize(commentData.Author), sanitize(commentData.Comment))
 		if err != nil {
 			s.logger.Println(err)
+			<-s.receiveSemaphore
 			continue
 		}
-		s.broadcast(&api.MorphData{
+		go s.broadcast(&api.MorphData{
 			Type: "prepend",
 			Id:   "comments",
 			Html: api.RenderComment(comment),
 		}, c.path)
+		<-s.receiveSemaphore
 	}
 }
 

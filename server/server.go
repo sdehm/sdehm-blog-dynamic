@@ -17,6 +17,7 @@ type Server struct {
 	connections       []*connection
 	connectionUpdates chan func()
 	lastId            int
+	receiveSemaphore	chan struct{}
 }
 
 func Start(addr string, logger *log.Logger, repo data.Repo) error {
@@ -24,6 +25,7 @@ func Start(addr string, logger *log.Logger, repo data.Repo) error {
 		logger:            logger,
 		repo:              repo,
 		connectionUpdates: make(chan func()),
+		receiveSemaphore: make(chan struct{}, 1),
 	}
 	http.Handle("/ws", s.wsHandler())
 
@@ -37,10 +39,10 @@ func (s *Server) wsHandler() http.HandlerFunc {
 		queryParams := r.URL.Query()
 		path := queryParams.Get("path")
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
-		s.addConnection(conn, path)
 		if err != nil {
 			panic(err)
 		}
+		s.addConnection(conn, path)
 	}
 }
 
@@ -52,7 +54,6 @@ func (s *Server) addConnection(c net.Conn, path string) {
 			conn: c,
 			path: path,
 		}
-		go conn.receiver(s)
 		s.connections = append(s.connections, conn)
 		id := fmt.Sprint(conn.id)
 		comments, err := s.repo.GetPost(path)
@@ -63,6 +64,7 @@ func (s *Server) addConnection(c net.Conn, path string) {
 		commentsHtml := api.RenderPostComments(comments)
 		conn.sendConnected(id, commentsHtml)
 		s.logger.Printf("New connection: %s", id)
+		go conn.receiver(s)
 	}
 }
 
