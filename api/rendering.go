@@ -17,7 +17,7 @@ const commentTemplate = `<div>
 </div>
 </div>`
 
-const postTemplate = `<div>
+const postTemplate = `<div id="comments">
 <p>Comments</p>
 <form id="comment-form" class="w-full max-w-xs" action="#">
 	<div class="form-control">
