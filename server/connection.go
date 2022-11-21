@@ -44,7 +44,7 @@ func (c *connection) send(m api.Message) error {
 
 func (c *connection) receiver(s *Server) {
 	defer c.conn.Close()
-	
+
 	for {
 		data, _, err := wsutil.ReadClientData(c.conn)
 		if err != nil {
@@ -69,7 +69,7 @@ func (c *connection) receiver(s *Server) {
 		}
 		s.broadcast(&api.MorphData{
 			Type: "prepend",
-			Id:   "comments",
+			Id:   "comment_list",
 			Html: api.RenderComment(comment),
 		}, c.path)
 	}
