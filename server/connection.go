@@ -43,10 +43,13 @@ func (c *connection) send(m api.Message) error {
 }
 
 func (c *connection) receiver(s *Server) {
+	defer c.conn.Close()
+	
 	for {
 		data, _, err := wsutil.ReadClientData(c.conn)
 		if err != nil {
-			continue
+			s.removeConnection(c)
+			return
 		}
 
 		commentData := struct {
