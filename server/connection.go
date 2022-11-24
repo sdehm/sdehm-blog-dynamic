@@ -43,10 +43,13 @@ func (c *connection) send(m api.Message) error {
 }
 
 func (c *connection) receiver(s *Server) {
+	defer c.conn.Close()
+
 	for {
 		data, _, err := wsutil.ReadClientData(c.conn)
 		if err != nil {
-			continue
+			s.removeConnection(c)
+			return
 		}
 
 		commentData := struct {
@@ -56,7 +59,7 @@ func (c *connection) receiver(s *Server) {
 		}{}
 		err = json.Unmarshal(data, &commentData)
 		if err != nil || commentData.Type != "comment" {
-			s.logger.Println("Invalid data received from client")
+			s.logger.Println("Invalid data received from client, err: ", err)
 			continue
 		}
 		comment, err := s.repo.AddComment(c.path, sanitize(commentData.Author), sanitize(commentData.Comment))
@@ -66,7 +69,7 @@ func (c *connection) receiver(s *Server) {
 		}
 		s.broadcast(&api.MorphData{
 			Type: "prepend",
-			Id:   "comments",
+			Id:   "comment_list",
 			Html: api.RenderComment(comment),
 		}, c.path)
 	}

@@ -17,7 +17,7 @@ const commentTemplate = `<div>
 </div>
 </div>`
 
-const postTemplate = `<div>
+const postTemplate = `<div id="comments" class="comments">
 <p>Comments</p>
 <form id="comment-form" class="w-full max-w-xs" action="#">
 	<div class="form-control">
@@ -37,7 +37,7 @@ const postTemplate = `<div>
 		<button class="border-2 border-neutral-300 dark:border-neutral-600 font-bold py-2 px-2 rounded hover:border-4 mb-2">Submit</button>
 	</div>
 </form>
-<div id="comments" class="comments">
+<div id="comment_list">
 %s
 </div>`
 

@@ -39,7 +39,7 @@ func (s *Server) wsHandler() http.HandlerFunc {
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
 		s.addConnection(conn, path)
 		if err != nil {
-			panic(err)
+			s.logger.Println(err)
 		}
 	}
 }
