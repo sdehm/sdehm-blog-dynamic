@@ -55,12 +55,12 @@ func (s *Server) addConnection(c net.Conn, path string) {
 		go conn.receiver(s)
 		s.connections = append(s.connections, conn)
 		id := fmt.Sprint(conn.id)
-		comments, err := s.repo.GetPost(path)
+		post, err := s.repo.GetPost(path)
 		if err != nil {
 			s.logger.Println(err)
 			return
 		}
-		commentsHtml := api.RenderPostComments(comments)
+		commentsHtml := api.RenderPostComments(post)
 		conn.sendConnected(id, commentsHtml)
 		s.logger.Printf("New connection: %s", id)
 	}
