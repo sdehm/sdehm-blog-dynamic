@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS posts (
+    path VARCHAR(255) PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS comments (
+    id SERIAL PRIMARY KEY,
+    author VARCHAR(20) NOT NULL,
+    body VARCHAR(255) NOT NULL,
+    post_path VARCHAR(255) NOT NULL REFERENCES posts(path) ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL,
+    INDEX (post_path)
+);
