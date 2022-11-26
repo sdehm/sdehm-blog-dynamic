@@ -70,7 +70,7 @@ func (c *connection) receiver(s *Server) {
 		s.broadcast(&api.MorphData{
 			Type: "prepend",
 			Id:   "comment_list",
-			Html: api.RenderComment(comment),
+			Html: api.RenderComment(*comment),
 		}, c.path)
 	}
 }

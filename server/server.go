@@ -60,7 +60,7 @@ func (s *Server) addConnection(c net.Conn, path string) {
 			s.logger.Println(err)
 			return
 		}
-		commentsHtml := api.RenderPostComments(post)
+		commentsHtml := api.RenderPostComments(*post)
 		conn.sendConnected(id, commentsHtml)
 		s.logger.Printf("New connection: %s", id)
 	}
