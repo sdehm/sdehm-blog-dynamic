@@ -5,7 +5,6 @@ import (
 )
 
 type Comment struct {
-	Id        int
 	Author    string
 	Body      string
 	Timestamp time.Time

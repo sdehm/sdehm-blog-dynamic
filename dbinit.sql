@@ -1,12 +1,16 @@
-CREATE TABLE IF NOT EXISTS posts (
-    path VARCHAR(255) PRIMARY KEY
+DROP TABLE comments;
+DROP TABLE posts;
+
+CREATE TABLE posts (
+    id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid() ,
+    path VARCHAR(255) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS comments (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE comments (
+    id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
     author VARCHAR(20) NOT NULL,
     body VARCHAR(255) NOT NULL,
-    post_path VARCHAR(255) NOT NULL REFERENCES posts(path) ON DELETE CASCADE,
+    post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
     created_at TIMESTAMP NOT NULL,
-    INDEX (post_path)
+    INDEX (post_id)
 );

@@ -19,6 +19,7 @@ require (
 require (
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v4 v4.17.2
 	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
 )

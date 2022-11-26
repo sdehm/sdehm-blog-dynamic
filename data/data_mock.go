@@ -17,24 +17,12 @@ func NewDataMock() *DataMock {
 	}
 }
 
-func (d *DataMock) GetComment(id int) (*models.Comment, error) {
-	for _, p := range d.posts {
-		for _, c := range p.Comments {
-			if c.Id == id {
-				return &c, nil
-			}
-		}
-	}
-	return nil, nil
-}
-
 func (d *DataMock) GetPost(path string) (models.Post, error) {
 	return d.posts[path], nil
 }
 
 func (d *DataMock) AddComment(p string, author string, body string) (models.Comment, error) {
 	c := models.Comment{
-		Id:        len(d.posts[p].Comments) + 1,
 		Author:    author,
 		Body:      body,
 		Timestamp: time.Now().UTC(),
@@ -49,16 +37,4 @@ func (d *DataMock) AddComment(p string, author string, body string) (models.Comm
 	post.Comments = append(post.Comments, c)
 	d.posts[p] = post
 	return c, nil
-}
-
-func (d *DataMock) DeleteComment(id int) error {
-	for _, p := range d.posts {
-		for i, c := range p.Comments {
-			if c.Id == id {
-				p.Comments = append(p.Comments[:i], p.Comments[i+1:]...)
-				return nil
-			}
-		}
-	}
-	return nil
 }
