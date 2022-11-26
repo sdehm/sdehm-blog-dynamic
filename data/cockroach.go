@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -29,11 +28,11 @@ type postDTO struct {
 	Path string
 }
 
-func NewCockroachConnection() (*Cockroach, error) {
+func NewCockroachConnection(connectionString string) (*Cockroach, error) {
 	context := context.TODO()
 	// get connection string from environment variable
 	// TODO: return the errors rather than log fatal
-	config, err := pgx.ParseConfig(os.Getenv("COCKROACH_CONNECTION"))
+	config, err := pgx.ParseConfig(connectionString)
 	if err != nil {
 		log.Fatal(" failed to parse config", err)
 	}
