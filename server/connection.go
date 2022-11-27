@@ -58,6 +58,9 @@ func (c *connection) receiver(s *Server) {
 			Comment string `json:"comment"`
 		}{}
 		err = json.Unmarshal(data, &commentData)
+		if commentData.Type == "heartbeat" {
+			continue
+		}
 		if err != nil || commentData.Type != "comment" {
 			s.logger.Println("Invalid data received from client, err: ", err)
 			continue
