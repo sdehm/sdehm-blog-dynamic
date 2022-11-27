@@ -62,7 +62,7 @@ func (c *Cockroach) GetPost(path string) (*models.Post, error) {
 	}
 	comments := []models.Comment{}
 	// TODO: use a join to get the comments
-	rows, err := c.conn.Query(c.ctx, "SELECT id, author, body, created_at FROM comments WHERE post_id = $1", post.Id)
+	rows, err := c.conn.Query(c.ctx, "SELECT id, author, body, created_at FROM comments WHERE post_id = $1 ORDER BY created_at", post.Id)
 	if err != nil {
 		return nil, err
 	}
