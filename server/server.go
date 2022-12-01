@@ -54,15 +54,17 @@ func (s *Server) addConnection(c net.Conn, path string) {
 			conn: c,
 			path: path,
 		}
+
+		commentsHtml, err := s.getCommentsHtml(path)
+		if err != nil {
+			s.logger.Println(err)
+			conn.conn.Close()
+			return
+		}
+
 		go conn.receiver(s)
 		s.connections = append(s.connections, conn)
 		id := fmt.Sprint(conn.id)
-		post, err := s.repo.GetPost(path)
-		if err != nil {
-			s.logger.Println(err)
-			return
-		}
-		commentsHtml := api.RenderPostComments(*post)
 		conn.sendConnected(id, commentsHtml)
 		s.logger.Printf("New connection: %s", id)
 	}
@@ -97,4 +99,12 @@ func (s *Server) broadcast(m api.Message, path string) {
 			s.removeConnection(c)
 		}
 	}
+}
+
+func (s *Server) getCommentsHtml(path string) (string, error) {
+	post, err := s.repo.GetPost(path)
+	if err != nil {
+		return "", err
+	}
+	return api.RenderPostComments(*post), nil
 }
