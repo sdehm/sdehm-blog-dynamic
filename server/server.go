@@ -39,6 +39,8 @@ func (s *Server) wsHandler() http.HandlerFunc {
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
 		if err != nil {
 			s.logger.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 		go s.addConnection(conn, path)
 	}
