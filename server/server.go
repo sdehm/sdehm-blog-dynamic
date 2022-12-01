@@ -37,10 +37,10 @@ func (s *Server) wsHandler() http.HandlerFunc {
 		queryParams := r.URL.Query()
 		path := queryParams.Get("path")
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
-		s.addConnection(conn, path)
 		if err != nil {
 			s.logger.Println(err)
 		}
+		go s.addConnection(conn, path)
 	}
 }
 
