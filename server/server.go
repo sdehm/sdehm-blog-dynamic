@@ -67,6 +67,7 @@ func (s *Server) addConnection(c net.Conn, path string) {
 		id := fmt.Sprint(conn.id)
 		conn.sendConnected(id, commentsHtml)
 		s.logger.Printf("New connection: %s", id)
+		go s.updateViewers(path)
 	}
 }
 
@@ -76,6 +77,7 @@ func (s *Server) removeConnection(c *connection) {
 			if con.id == c.id {
 				s.connections = append(s.connections[:i], s.connections[i+1:]...)
 				s.logger.Printf("Connection closed: %d", c.id)
+				go s.updateViewers(c.path)
 				return
 			}
 		}
@@ -107,4 +109,20 @@ func (s *Server) getCommentsHtml(path string) (string, error) {
 		return "", err
 	}
 	return api.RenderPostComments(*post), nil
+}
+
+func (s *Server) updateViewers(path string) {
+	viewers := 0
+	for _, c := range s.connections {
+		if c.path == path {
+			viewers++
+		}
+	}
+	// strip first and last character from path
+	id := "views_" + path[1:len(path)-1] + ".md"
+	s.broadcast(&api.MorphData{
+		Type: "morph",
+		Id:   id,
+		Html: api.RenderViewers(id, viewers),
+	}, path)
 }
