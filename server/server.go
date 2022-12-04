@@ -119,10 +119,23 @@ func (s *Server) updateViewers(path string) {
 		}
 	}
 	// strip first and last character from path
-	id := "views_" + path[1:len(path)-1] + ".md"
+	id, ok := viewersId(path)
+	if !ok {
+		// invalid path for the viewer count, don't update
+		return
+	}
 	s.broadcast(&api.MorphData{
 		Type: "morph",
 		Id:   id,
 		Html: api.RenderViewers(id, viewers),
 	}, path)
+}
+
+// build the viewers count id from the path
+// returns the id and a boolean indicating if the path yielded a valid id
+func viewersId(path string) (string, bool) {
+	if len(path) < 2 {
+		return "", false
+	}
+	return "views_" + path[1:len(path)-1] + ".md", true
 }
