@@ -42,11 +42,6 @@ func NewCockroachConnection(connectionString string) (*Cockroach, error) {
 	if err != nil {
 		log.Fatal("failed to connect database", err)
 	}
-	// set database to "blog"
-	// _, err = conn.Exec(c.ctx, "SET DATABASE = blog")
-	// if err != nil {
-	// 	log.Fatal("failed to set database", err)
-	// }
 	return &Cockroach{conn: conn, ctx: context}, nil
 }
 
@@ -55,22 +50,22 @@ func (c *Cockroach) Close() error {
 }
 
 func (c *Cockroach) GetPost(path string) (*models.Post, error) {
-	post := postDTO{}
-	err := c.conn.QueryRow(c.ctx, "SELECT id, path FROM posts WHERE path = $1", path).Scan(&post.Id, &post.Path)
-	if err != nil && err != pgx.ErrNoRows {
-		return nil, err
-	}
-	comments := []models.Comment{}
-	// TODO: use a join to get the comments
-	rows, err := c.conn.Query(c.ctx, "SELECT id, author, body, created_at FROM comments WHERE post_id = $1 ORDER BY created_at", post.Id)
+	sql := `SELECT p.id, p.path, c.id, c.author, c.body, c.created_at
+			FROM posts p
+			LEFT JOIN comments c ON p.id = c.post_id
+			WHERE p.path = $1`
+	rows, err := c.conn.Query(c.ctx, sql, path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get post: %w", err)
 	}
+	defer rows.Close()
+	var post postDTO
+	comments := []models.Comment{}
 	for rows.Next() {
-		comment := commentDTO{}
-		err = rows.Scan(&comment.Id, &comment.Author, &comment.Body, &comment.CreatedAt)
+		var comment commentDTO
+		err := rows.Scan(&post.Id, &post.Path, &comment.Id, &comment.Author, &comment.Body, &comment.CreatedAt)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 		comments = append(comments, models.Comment{
 			Author:    comment.Author,
