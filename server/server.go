@@ -5,11 +5,14 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"regexp"
 
 	"github.com/gobwas/ws"
 	"github.com/sdehm/sdehm-blog-dynamic/api"
 	"github.com/sdehm/sdehm-blog-dynamic/data"
 )
+
+var postPath = regexp.MustCompile(`^/posts/[^/]+/$`)
 
 type Server struct {
 	logger            *log.Logger
@@ -34,15 +37,21 @@ func Start(addr string, logger *log.Logger, repo data.Repo) error {
 
 func (s *Server) wsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		queryParams := r.URL.Query()
-		path := queryParams.Get("path")
-		conn, _, _, err := ws.UpgradeHTTP(r, w)
-		if err != nil {
-			s.logger.Println(err)
-			w.WriteHeader(http.StatusBadRequest)
+		switch path := r.URL.Query().Get("path"); {
+		case path == "/":
+			// ignore the root path
 			return
+		case postPath.MatchString(path):
+			conn, _, _, err := ws.UpgradeHTTP(r, w)
+			if err != nil {
+				s.logger.Println(err)
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			go s.addConnection(conn, path)
+		default:
+			s.logger.Printf("Unknown path: %s", path)
 		}
-		go s.addConnection(conn, path)
 	}
 }
 
