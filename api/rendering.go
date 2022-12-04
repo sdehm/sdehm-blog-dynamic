@@ -41,6 +41,8 @@ const postTemplate = `<div id="comments" class="comments">
 %s
 </div>`
 
+const viewersTemplate = `<span id="%s" title="views">%d</span>`
+
 func RenderComment(c models.Comment) string {
 	tf := c.Timestamp.Format("2 January 2006")
 	return fmt.Sprintf(commentTemplate, c.Author, c.Timestamp, tf, c.Body)
@@ -53,4 +55,8 @@ func RenderPostComments(p models.Post) string {
 		html = RenderComment(c) + html
 	}
 	return fmt.Sprintf(postTemplate, html)
+}
+
+func RenderViewers(id string, count int) string {
+	return fmt.Sprintf(viewersTemplate, id, count)
 }

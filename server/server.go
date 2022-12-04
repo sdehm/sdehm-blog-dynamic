@@ -5,11 +5,14 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"regexp"
 
 	"github.com/gobwas/ws"
 	"github.com/sdehm/sdehm-blog-dynamic/api"
 	"github.com/sdehm/sdehm-blog-dynamic/data"
 )
+
+var postPath = regexp.MustCompile(`^/posts/[^/]+/$`)
 
 type Server struct {
 	logger            *log.Logger
@@ -34,15 +37,21 @@ func Start(addr string, logger *log.Logger, repo data.Repo) error {
 
 func (s *Server) wsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		queryParams := r.URL.Query()
-		path := queryParams.Get("path")
-		conn, _, _, err := ws.UpgradeHTTP(r, w)
-		if err != nil {
-			s.logger.Println(err)
-			w.WriteHeader(http.StatusBadRequest)
+		switch path := r.URL.Query().Get("path"); {
+		case path == "/":
+			// ignore the root path
 			return
+		case postPath.MatchString(path):
+			conn, _, _, err := ws.UpgradeHTTP(r, w)
+			if err != nil {
+				s.logger.Println(err)
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			go s.addConnection(conn, path)
+		default:
+			s.logger.Printf("Unknown path: %s", path)
 		}
-		go s.addConnection(conn, path)
 	}
 }
 
@@ -67,6 +76,7 @@ func (s *Server) addConnection(c net.Conn, path string) {
 		id := fmt.Sprint(conn.id)
 		conn.sendConnected(id, commentsHtml)
 		s.logger.Printf("New connection: %s", id)
+		go s.updateViewers(path)
 	}
 }
 
@@ -76,6 +86,7 @@ func (s *Server) removeConnection(c *connection) {
 			if con.id == c.id {
 				s.connections = append(s.connections[:i], s.connections[i+1:]...)
 				s.logger.Printf("Connection closed: %d", c.id)
+				go s.updateViewers(c.path)
 				return
 			}
 		}
@@ -107,4 +118,33 @@ func (s *Server) getCommentsHtml(path string) (string, error) {
 		return "", err
 	}
 	return api.RenderPostComments(*post), nil
+}
+
+func (s *Server) updateViewers(path string) {
+	viewers := 0
+	for _, c := range s.connections {
+		if c.path == path {
+			viewers++
+		}
+	}
+	// strip first and last character from path
+	id, ok := viewersId(path)
+	if !ok {
+		// invalid path for the viewer count, don't update
+		return
+	}
+	s.broadcast(&api.MorphData{
+		Type: "morph",
+		Id:   id,
+		Html: api.RenderViewers(id, viewers),
+	}, path)
+}
+
+// build the viewers count id from the path
+// returns the id and a boolean indicating if the path yielded a valid id
+func viewersId(path string) (string, bool) {
+	if len(path) < 2 {
+		return "", false
+	}
+	return "views_" + path[1:len(path)-1] + ".md", true
 }
