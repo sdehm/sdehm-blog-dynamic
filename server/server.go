@@ -39,18 +39,17 @@ func Start(addr string, logger *log.Logger, repo data.Repo) error {
 
 func (s *Server) wsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		switch path := r.URL.Query().Get("path"); {
-		case postPath.MatchString(path) || path == "/":
-			conn, _, _, err := ws.UpgradeHTTP(r, w)
-			if err != nil {
-				s.logger.Println(err)
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-			go s.addConnection(conn, path)
-		default:
-			s.logger.Printf("Unknown path: %s", path)
+		path := r.URL.Query().Get("path")
+		if path != "/" && path != "/posts/" && !postPath.MatchString(path) {
+			http.Error(w, "Invalid path", http.StatusBadRequest)
+			return
 		}
+		conn, _, _, err := ws.UpgradeHTTP(r, w)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		go s.addConnection(conn, path)
 	}
 }
 
@@ -68,8 +67,8 @@ func (s *Server) addConnection(c net.Conn, path string) {
 		s.connections = append(s.connections, conn)
 		id := fmt.Sprint(conn.id)
 
-		if path == "/" {
-			go s.updateAllViewers()
+		if path == "/" || path == "/posts/" {
+			go s.updateAllViewers(path)
 		} else {
 			commentsHtml, err := s.getCommentsHtml(path)
 			if err != nil {
@@ -130,6 +129,9 @@ func (s *Server) getCommentsHtml(path string) (string, error) {
 }
 
 func (s *Server) updateViewers(path string) {
+	if path == "/" || path == "/posts/" {
+		return
+	}
 	viewers := s.connectionCounts[path]
 	// strip first and last character from path
 	id, ok := viewersId(path)
@@ -147,10 +149,19 @@ func (s *Server) updateViewers(path string) {
 		Id:   id,
 		Html: api.RenderViewers(id, viewers),
 	}, "/")
+	s.broadcast(&api.MorphData{
+		Type: "morph",
+		Id:   id,
+		Html: api.RenderViewers(id, viewers),
+	}, "/posts/")
 }
 
-func (s *Server) updateAllViewers() {
+func (s *Server) updateAllViewers(p string) {
 	for path := range s.connectionCounts {
+		if path == "/" || path == "/posts/" {
+			continue
+		}
+
 		id, ok := viewersId(path)
 		if !ok {
 			// invalid path for the viewer count, don't update
@@ -164,7 +175,7 @@ func (s *Server) updateAllViewers() {
 			Type: "morph",
 			Id:   id,
 			Html: api.RenderViewers(id, s.connectionCounts[path]),
-		}, "/")
+		}, p)
 	}
 }
 
