@@ -75,10 +75,10 @@ func (s *Server) addConnection(c net.Conn, path string) {
 				return
 			}
 			conn.sendConnected(id, commentsHtml)
+			go s.updateViewers(path)
 		}
 
 		s.logger.Printf("New connection: %s", id)
-		go s.updateViewers(path)
 	}
 }
 
