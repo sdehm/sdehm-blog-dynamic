@@ -19,6 +19,7 @@ type Server struct {
 	repo              data.Repo
 	connections       []*connection
 	connectionUpdates chan func()
+	connectionCounts	map[string]int
 	lastId            int
 }
 
@@ -27,6 +28,7 @@ func Start(addr string, logger *log.Logger, repo data.Repo) error {
 		logger:            logger,
 		repo:              repo,
 		connectionUpdates: make(chan func()),
+		connectionCounts: make(map[string]int),
 	}
 	http.Handle("/ws", s.wsHandler())
 
@@ -60,12 +62,15 @@ func (s *Server) addConnection(c net.Conn, path string) {
 			conn: c,
 			path: path,
 		}
+		s.connectionCounts[path]++
 
 		go conn.receiver(s)
 		s.connections = append(s.connections, conn)
 		id := fmt.Sprint(conn.id)
 
-		if path != "/" {
+		if path == "/" {
+			go s.updateAllViewers()
+		} else {
 			commentsHtml, err := s.getCommentsHtml(path)
 			if err != nil {
 				s.logger.Println(err)
@@ -85,6 +90,10 @@ func (s *Server) removeConnection(c *connection) {
 		for i, con := range s.connections {
 			if con.id == c.id {
 				s.connections = append(s.connections[:i], s.connections[i+1:]...)
+				s.connectionCounts[c.path]--
+				if s.connectionCounts[c.path] == 0 {
+					delete(s.connectionCounts, c.path)
+				}
 				s.logger.Printf("Connection closed: %d", c.id)
 				go s.updateViewers(c.path)
 				return
@@ -121,12 +130,7 @@ func (s *Server) getCommentsHtml(path string) (string, error) {
 }
 
 func (s *Server) updateViewers(path string) {
-	viewers := 0
-	for _, c := range s.connections {
-		if c.path == path {
-			viewers++
-		}
-	}
+	viewers := s.connectionCounts[path]
 	// strip first and last character from path
 	id, ok := viewersId(path)
 	if !ok {
@@ -143,6 +147,25 @@ func (s *Server) updateViewers(path string) {
 		Id:   id,
 		Html: api.RenderViewers(id, viewers),
 	}, "/")
+}
+
+func (s *Server) updateAllViewers() {
+	for path := range s.connectionCounts {
+		id, ok := viewersId(path)
+		if !ok {
+			// invalid path for the viewer count, don't update
+			continue
+		}
+		viewers := s.connectionCounts[path]
+		if viewers == 0 {
+			continue
+		}
+		s.broadcast(&api.MorphData{
+			Type: "morph",
+			Id:   id,
+			Html: api.RenderViewers(id, s.connectionCounts[path]),
+		}, "/")
+	}
 }
 
 // build the viewers count id from the path
