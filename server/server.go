@@ -38,10 +38,7 @@ func Start(addr string, logger *log.Logger, repo data.Repo) error {
 func (s *Server) wsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch path := r.URL.Query().Get("path"); {
-		case path == "/":
-			// ignore the root path
-			return
-		case postPath.MatchString(path):
+		case postPath.MatchString(path) || path == "/":
 			conn, _, _, err := ws.UpgradeHTTP(r, w)
 			if err != nil {
 				s.logger.Println(err)
@@ -64,17 +61,20 @@ func (s *Server) addConnection(c net.Conn, path string) {
 			path: path,
 		}
 
-		commentsHtml, err := s.getCommentsHtml(path)
-		if err != nil {
-			s.logger.Println(err)
-			conn.conn.Close()
-			return
-		}
-
 		go conn.receiver(s)
 		s.connections = append(s.connections, conn)
 		id := fmt.Sprint(conn.id)
-		conn.sendConnected(id, commentsHtml)
+
+		if path != "/" {
+			commentsHtml, err := s.getCommentsHtml(path)
+			if err != nil {
+				s.logger.Println(err)
+				conn.conn.Close()
+				return
+			}
+			conn.sendConnected(id, commentsHtml)
+		}
+
 		s.logger.Printf("New connection: %s", id)
 		go s.updateViewers(path)
 	}
@@ -138,6 +138,11 @@ func (s *Server) updateViewers(path string) {
 		Id:   id,
 		Html: api.RenderViewers(id, viewers),
 	}, path)
+	s.broadcast(&api.MorphData{
+		Type: "morph",
+		Id:   id,
+		Html: api.RenderViewers(id, viewers),
+	}, "/")
 }
 
 // build the viewers count id from the path
