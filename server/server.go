@@ -12,8 +12,6 @@ import (
 	"github.com/sdehm/sdehm-blog-dynamic/data"
 )
 
-var postPath = regexp.MustCompile(`^/posts/[^/]+/$`)
-
 type Server struct {
 	logger            *log.Logger
 	repo              data.Repo
@@ -40,7 +38,7 @@ func Start(addr string, logger *log.Logger, repo data.Repo) error {
 func (s *Server) wsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Query().Get("path")
-		if path != "/" && path != "/posts/" && !postPath.MatchString(path) {
+		if !isPostListPath(path) && !isPostPath(path) {
 			http.Error(w, "Invalid path", http.StatusBadRequest)
 			return
 		}
@@ -67,7 +65,7 @@ func (s *Server) addConnection(c net.Conn, path string) {
 		s.connections = append(s.connections, conn)
 		id := fmt.Sprint(conn.id)
 
-		if path == "/" || path == "/posts/" {
+		if isPostListPath(path) {
 			go s.updateAllViewers(path)
 		} else {
 			commentsHtml, err := s.getCommentsHtml(path)
@@ -129,7 +127,7 @@ func (s *Server) getCommentsHtml(path string) (string, error) {
 }
 
 func (s *Server) updateViewers(path string) {
-	if path == "/" || path == "/posts/" {
+	if isPostListPath(path) {
 		return
 	}
 	viewers := s.connectionCounts[path]
@@ -158,7 +156,7 @@ func (s *Server) updateViewers(path string) {
 
 func (s *Server) updateAllViewers(p string) {
 	for path := range s.connectionCounts {
-		if path == "/" || path == "/posts/" {
+		if isPostListPath(path) {
 			continue
 		}
 
@@ -186,4 +184,14 @@ func viewersId(path string) (string, bool) {
 		return "", false
 	}
 	return "views_" + path[1:len(path)-1] + ".md", true
+}
+
+var postPath = regexp.MustCompile(`^/posts/[^/]+/$`)
+
+func isPostPath(p string) bool {
+	return postPath.MatchString(p)
+}
+
+func isPostListPath(p string) bool {
+	return p == "/" || p == "/posts/"
 }
