@@ -19,7 +19,7 @@ type Server struct {
 	repo              data.Repo
 	connections       []*connection
 	connectionUpdates chan func()
-	connectionCounts	map[string]int
+	connectionCounts  map[string]int
 	lastId            int
 }
 
@@ -28,7 +28,7 @@ func Start(addr string, logger *log.Logger, repo data.Repo) error {
 		logger:            logger,
 		repo:              repo,
 		connectionUpdates: make(chan func()),
-		connectionCounts: make(map[string]int),
+		connectionCounts:  make(map[string]int),
 	}
 	http.Handle("/ws", s.wsHandler())
 
