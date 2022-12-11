@@ -33,12 +33,10 @@ func (c *connection) send(m api.Message) error {
 	if err != nil {
 		return err
 	}
-
 	err = wsutil.WriteServerText(c.conn, data)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -51,7 +49,6 @@ func (c *connection) receiver(s *Server) {
 			s.removeConnection(c)
 			return
 		}
-
 		commentData := struct {
 			Type    string `json:"type"`
 			Author  string `json:"author"`

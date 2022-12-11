@@ -90,7 +90,10 @@ func (c *Cockroach) AddComment(path string, author string, body string) (*models
 	if err != nil {
 		return nil, err
 	}
-	err = c.conn.QueryRow(c.ctx, "INSERT INTO comments (post_id, author, body, created_at) VALUES ($1, $2, $3, $4) RETURNING author, body, created_at", post.Id, comment.Author, comment.Body, comment.CreatedAt).Scan(&comment.Author, &comment.Body, &comment.CreatedAt)
+	err = c.conn.QueryRow(
+		c.ctx,
+		"INSERT INTO comments (post_id, author, body, created_at) VALUES ($1, $2, $3, $4) RETURNING author, body, created_at",
+		post.Id, comment.Author, comment.Body, comment.CreatedAt).Scan(&comment.Author, &comment.Body, &comment.CreatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add comment: %w", err)
 	}
@@ -110,7 +113,10 @@ func (c *Cockroach) getOrAddPost(path string) (*postDTO, error) {
 	if err == nil {
 		return &post, nil
 	}
-	err = c.conn.QueryRow(c.ctx, "INSERT INTO posts (path) VALUES ($1) RETURNING id, path", path).Scan(&post.Id, &post.Path)
+	err = c.conn.QueryRow(
+		c.ctx,
+		"INSERT INTO posts (path) VALUES ($1) RETURNING id, path",
+		path).Scan(&post.Id, &post.Path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add post: %w", err)
 	}

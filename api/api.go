@@ -2,7 +2,6 @@ package api
 
 import "encoding/json"
 
-// Message interface
 type Message interface {
 	Marshal() ([]byte, error)
 }
