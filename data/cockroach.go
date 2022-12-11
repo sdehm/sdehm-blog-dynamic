@@ -28,21 +28,20 @@ type postDTO struct {
 	Path string
 }
 
-func NewCockroachConnection(connectionString string) (*Cockroach, error) {
-	context := context.TODO()
+func NewCockroachConnection(connectionString string, ctx context.Context) (*Cockroach, error) {
 	// get connection string from environment variable
-	// TODO: return the errors rather than log fatal
 	config, err := pgx.ParseConfig(connectionString)
+	// TODO: return the errors rather than log fatal
 	if err != nil {
 		log.Fatal(" failed to parse config", err)
 	}
 	config.RuntimeParams["database"] = "blog"
 	config.RuntimeParams["user"] = "blog"
-	conn, err := pgx.ConnectConfig(context, config)
+	conn, err := pgx.ConnectConfig(ctx, config)
 	if err != nil {
 		log.Fatal("failed to connect database", err)
 	}
-	return &Cockroach{conn: conn, ctx: context}, nil
+	return &Cockroach{conn: conn, ctx: ctx}, nil
 }
 
 func (c *Cockroach) Close() error {
