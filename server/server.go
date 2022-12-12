@@ -66,7 +66,7 @@ func (s *Server) addConnection(c net.Conn, path string) {
 		id := fmt.Sprint(conn.id)
 
 		if isPostListPath(path) {
-			go s.updateAllViewers(path)
+			s.updateAllViewers(path)
 		} else {
 			commentsHtml, err := s.getCommentsHtml(path)
 			if err != nil {
@@ -75,7 +75,7 @@ func (s *Server) addConnection(c net.Conn, path string) {
 				return
 			}
 			conn.sendConnected(id, commentsHtml)
-			go s.updateViewers(path)
+			s.updateViewers(path)
 		}
 
 		s.logger.Printf("New connection: %s", id)
@@ -92,7 +92,7 @@ func (s *Server) removeConnection(c *connection) {
 					delete(s.connectionCounts, c.path)
 				}
 				s.logger.Printf("Connection closed: %d", c.id)
-				go s.updateViewers(c.path)
+				s.updateViewers(c.path)
 				return
 			}
 		}
@@ -113,7 +113,7 @@ func (s *Server) broadcast(m api.Message, path string) {
 		err := c.send(m)
 		if err != nil {
 			s.logger.Println(err)
-			s.removeConnection(c)
+			go s.removeConnection(c)
 		}
 	}
 }
