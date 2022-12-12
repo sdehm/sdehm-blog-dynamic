@@ -137,21 +137,14 @@ func (s *Server) updateViewers(path string) {
 		// invalid path for the viewer count, don't update
 		return
 	}
-	s.broadcast(&api.MorphData{
+	message := &api.MorphData{
 		Type: "morph",
 		Id:   id,
 		Html: api.RenderViewers(id, viewers),
-	}, path)
-	s.broadcast(&api.MorphData{
-		Type: "morph",
-		Id:   id,
-		Html: api.RenderViewers(id, viewers),
-	}, "/")
-	s.broadcast(&api.MorphData{
-		Type: "morph",
-		Id:   id,
-		Html: api.RenderViewers(id, viewers),
-	}, "/posts/")
+	}
+	s.broadcast(message, path)
+	s.broadcast(message, "/")
+	s.broadcast(message, "/posts/")
 }
 
 func (s *Server) updateAllViewers(p string) {
