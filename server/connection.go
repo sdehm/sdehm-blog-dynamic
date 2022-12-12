@@ -17,8 +17,8 @@ type connection struct {
 }
 
 // Send a message to the client to indicate that the connection was successful
-func (c *connection) sendConnected(id string, commentsHtml string) {
-	c.send(&api.Connected{
+func (c *connection) sendConnected(id string, commentsHtml string) error {
+	return c.send(&api.Connected{
 		ConnectionId: c.id,
 		Html:         commentsHtml,
 	})

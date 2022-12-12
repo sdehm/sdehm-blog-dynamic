@@ -53,16 +53,16 @@ func (s *Server) wsHandler() http.HandlerFunc {
 
 func (s *Server) addConnection(c net.Conn, path string) {
 	s.connectionUpdates <- func() {
-		s.lastId++
+		newId := s.lastId + 1
 		conn := &connection{
 			id:   s.lastId,
 			conn: c,
 			path: path,
 		}
+		s.lastId = newId
 		s.connectionCounts[path]++
-
-		go conn.receiver(s)
 		s.connections = append(s.connections, conn)
+
 		id := fmt.Sprint(conn.id)
 
 		if isPostListPath(path) {
@@ -71,13 +71,18 @@ func (s *Server) addConnection(c net.Conn, path string) {
 			commentsHtml, err := s.getCommentsHtml(path)
 			if err != nil {
 				s.logger.Println(err)
-				conn.conn.Close()
+				go s.removeConnection(conn)
 				return
 			}
-			conn.sendConnected(id, commentsHtml)
+			err = conn.sendConnected(id, commentsHtml)
+			if err != nil {
+				s.logger.Println(err)
+				go s.removeConnection(conn)
+				return
+			}
 			s.updateViewers(path)
 		}
-
+		go conn.receiver(s)
 		s.logger.Printf("New connection: %s", id)
 	}
 }
@@ -86,6 +91,7 @@ func (s *Server) removeConnection(c *connection) {
 	s.connectionUpdates <- func() {
 		for i, con := range s.connections {
 			if con.id == c.id {
+				con.conn.Close()
 				s.connections = append(s.connections[:i], s.connections[i+1:]...)
 				s.connectionCounts[c.path]--
 				if s.connectionCounts[c.path] == 0 {
@@ -147,6 +153,9 @@ func (s *Server) updateViewers(path string) {
 }
 
 func (s *Server) updateAllViewers(p string) {
+	if !isPostListPath(p) {
+		return
+	}
 	for path := range s.connectionCounts {
 		if isPostListPath(path) {
 			continue
@@ -154,10 +163,6 @@ func (s *Server) updateAllViewers(p string) {
 		id, ok := viewersId(path)
 		if !ok {
 			// invalid path for the viewer count, don't update
-			continue
-		}
-		viewers := s.connectionCounts[path]
-		if viewers == 0 {
 			continue
 		}
 		s.broadcast(&api.MorphData{
