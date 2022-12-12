@@ -131,7 +131,6 @@ func (s *Server) updateViewers(path string) {
 		return
 	}
 	viewers := s.connectionCounts[path]
-	// strip first and last character from path
 	id, ok := viewersId(path)
 	if !ok {
 		// invalid path for the viewer count, don't update
@@ -152,7 +151,6 @@ func (s *Server) updateAllViewers(p string) {
 		if isPostListPath(path) {
 			continue
 		}
-
 		id, ok := viewersId(path)
 		if !ok {
 			// invalid path for the viewer count, don't update
