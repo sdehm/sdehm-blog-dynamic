@@ -18,10 +18,7 @@ type connection struct {
 
 // Send a message to the client to indicate that the connection was successful
 func (c *connection) sendConnected(id string, commentsHtml string) error {
-	return c.send(&api.Connected{
-		ConnectionId: c.id,
-		Html:         commentsHtml,
-	})
+	return c.send(api.NewConnected(id, commentsHtml))
 }
 
 // Serialize the data to JSON and send it to the client
@@ -67,11 +64,7 @@ func (c *connection) receiver(s *Server) {
 			s.logger.Println(err)
 			continue
 		}
-		s.broadcast(&api.MorphData{
-			Type: "prepend",
-			Id:   "comment_list",
-			Html: api.RenderComment(*comment),
-		}, c.path)
+		s.broadcast(api.NewMorph("comment_list", api.RenderComment(*comment)), c.path)
 	}
 }
 
