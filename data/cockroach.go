@@ -85,6 +85,11 @@ func (c *Cockroach) GetPost(path string) (*models.Post, error) {
 			Timestamp: comment.CreatedAt,
 		})
 	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to get post: %w", err)
+	}
+
 	return &models.Post{
 		Path:     post.Path,
 		Comments: comments,
