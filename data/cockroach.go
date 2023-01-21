@@ -60,11 +60,13 @@ func (c *Cockroach) Close() error {
 	return c.conn.Close(c.ctx)
 }
 
+// TODO: may need to switch back to using two queries here if we ever want to
+// get info frm the posts table since a post may have no comments
 func (c *Cockroach) GetPost(path string) (*models.Post, error) {
 	c.ReconnectIfClosed()
 	sql := `SELECT p.id, p.path, c.id, c.author, c.body, c.created_at
 			FROM posts p
-			LEFT JOIN comments c ON p.id = c.post_id
+			RIGHT JOIN comments c ON p.id = c.post_id
 			WHERE p.path = $1`
 	rows, err := c.conn.Query(c.ctx, sql, path)
 	if err != nil {
