@@ -44,11 +44,24 @@ func NewCockroachConnection(connectionString string, ctx context.Context) (*Cock
 	return &Cockroach{conn: conn, ctx: ctx}, nil
 }
 
+func (c *Cockroach) ReconnectIfClosed() error {
+	if (c.conn.IsClosed()) {
+		log.Default().Println("Connection is closed, reconnecting")
+		conn, err := pgx.ConnectConfig(c.ctx, c.conn.Config())
+		if err != nil {
+			log.Fatal("failed to connect database", err)
+		}
+		c.conn = conn
+	}
+	return nil
+}
+
 func (c *Cockroach) Close() error {
 	return c.conn.Close(c.ctx)
 }
 
 func (c *Cockroach) GetPost(path string) (*models.Post, error) {
+	c.ReconnectIfClosed()
 	sql := `SELECT p.id, p.path, c.id, c.author, c.body, c.created_at
 			FROM posts p
 			LEFT JOIN comments c ON p.id = c.post_id
@@ -79,6 +92,7 @@ func (c *Cockroach) GetPost(path string) (*models.Post, error) {
 }
 
 func (c *Cockroach) AddComment(path string, author string, body string) (*models.Comment, error) {
+	c.ReconnectIfClosed()
 	// TODO: use a transaction
 	comment := commentDTO{
 		Author:    author,
@@ -104,6 +118,7 @@ func (c *Cockroach) AddComment(path string, author string, body string) (*models
 }
 
 func (c *Cockroach) getOrAddPost(path string) (*postDTO, error) {
+	c.ReconnectIfClosed()
 	post := postDTO{}
 	err := c.conn.QueryRow(c.ctx, "SELECT id, path FROM posts WHERE path = $1", path).Scan(&post.Id, &post.Path)
 	if err != nil && err != pgx.ErrNoRows {
