@@ -63,7 +63,10 @@ func (c *Cockroach) Close() error {
 // TODO: may need to switch back to using two queries here if we ever want to
 // get info frm the posts table since a post may have no comments
 func (c *Cockroach) GetPost(path string) (*models.Post, error) {
-	c.ReconnectIfClosed()
+	err := c.ReconnectIfClosed()
+	if err != nil {
+		return nil, err
+	}
 	sql := `SELECT p.id, p.path, c.id, c.author, c.body, c.created_at
 			FROM posts p
 			RIGHT JOIN comments c ON p.id = c.post_id
@@ -99,7 +102,10 @@ func (c *Cockroach) GetPost(path string) (*models.Post, error) {
 }
 
 func (c *Cockroach) AddComment(path string, author string, body string) (*models.Comment, error) {
-	c.ReconnectIfClosed()
+	err := c.ReconnectIfClosed()
+	if err != nil {
+		return nil, err
+	}
 	// TODO: use a transaction
 	comment := commentDTO{
 		Author:    author,
@@ -125,9 +131,12 @@ func (c *Cockroach) AddComment(path string, author string, body string) (*models
 }
 
 func (c *Cockroach) getOrAddPost(path string) (*postDTO, error) {
-	c.ReconnectIfClosed()
+	err := c.ReconnectIfClosed()
+	if err != nil {
+		return nil, err
+	}
 	post := postDTO{}
-	err := c.conn.QueryRow(c.ctx, "SELECT id, path FROM posts WHERE path = $1", path).Scan(&post.Id, &post.Path)
+	err = c.conn.QueryRow(c.ctx, "SELECT id, path FROM posts WHERE path = $1", path).Scan(&post.Id, &post.Path)
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, fmt.Errorf("failed to add post: %w", err)
 	}

@@ -23,5 +23,8 @@ func main() {
 	}
 	defer repo.Close()
 
-	server.Start(":8080", logger, repo)
+	err = server.Start(":8080", logger, repo)
+	if err != nil {
+		logger.Fatal("unable to start server", err)
+	}
 }
