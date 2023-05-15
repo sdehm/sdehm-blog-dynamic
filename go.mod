@@ -21,6 +21,6 @@ require (
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v4 v4.18.1
-	golang.org/x/net v0.9.0
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/net v0.10.0
+	golang.org/x/sys v0.8.0 // indirect
 )
