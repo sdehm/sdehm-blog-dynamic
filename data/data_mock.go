@@ -17,11 +17,12 @@ func NewDataMock() *DataMock {
 	}
 }
 
-func (d *DataMock) GetPost(path string) (models.Post, error) {
-	return d.posts[path], nil
+func (d *DataMock) GetPost(path string) (*models.Post, error) {
+	p := d.posts[path]
+	return &p, nil
 }
 
-func (d *DataMock) AddComment(p string, author string, body string) (models.Comment, error) {
+func (d *DataMock) AddComment(p string, author string, body string) (*models.Comment, error) {
 	c := models.Comment{
 		Author:    author,
 		Body:      body,
@@ -36,5 +37,5 @@ func (d *DataMock) AddComment(p string, author string, body string) (models.Comm
 	}
 	post.Comments = append(post.Comments, c)
 	d.posts[p] = post
-	return c, nil
+	return &c, nil
 }
