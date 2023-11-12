@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 	err := sentry.Init(sentry.ClientOptions{
 		Dsn:                "https://c5607567d1f2bb6a06f0ac910baaa5fb@o4506211186573312.ingest.sentry.io/4506211186704384",
 		TracesSampleRate:   1.0,
@@ -24,8 +25,7 @@ func main() {
 	logger := log.New(log.Writer(), "server: ", log.Flags())
 	// repo := data.NewDataMock()
 	connectionString := os.Getenv("COCKROACH_CONNECTION")
-	dataContext := context.Background()
-	dataContext, cancel := context.WithCancel(dataContext)
+	dataContext, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	repo, err := data.NewCockroachConnection(connectionString, dataContext)
