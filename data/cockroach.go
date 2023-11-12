@@ -45,7 +45,7 @@ func NewCockroachConnection(connectionString string, ctx context.Context) (*Cock
 }
 
 func (c *Cockroach) ReconnectIfClosed() error {
-	if (c.conn.IsClosed()) {
+	if c.conn.IsClosed() {
 		log.Default().Println("Connection is closed, reconnecting")
 		conn, err := pgx.ConnectConfig(c.ctx, c.conn.Config())
 		if err != nil {
