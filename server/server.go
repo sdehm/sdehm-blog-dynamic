@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gobwas/ws"
 	"github.com/sdehm/sdehm-blog-dynamic/api"
 	"github.com/sdehm/sdehm-blog-dynamic/data"
@@ -71,12 +72,14 @@ func (s *Server) addConnection(c net.Conn, path string) {
 			commentsHtml, err := s.getCommentsHtml(path)
 			if err != nil {
 				s.logger.Println(err)
+				sentry.CaptureException(err)
 				go s.removeConnection(conn)
 				return
 			}
 			err = conn.sendConnected(id, commentsHtml)
 			if err != nil {
 				s.logger.Println(err)
+				sentry.CaptureException(err)
 				go s.removeConnection(conn)
 				return
 			}
@@ -119,6 +122,7 @@ func (s *Server) broadcast(m api.Message, path string) {
 		err := c.send(m)
 		if err != nil {
 			s.logger.Println(err)
+			sentry.CaptureException(err)
 			go s.removeConnection(c)
 		}
 	}

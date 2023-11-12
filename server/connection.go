@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"net"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gobwas/ws/wsutil"
 	"github.com/sdehm/sdehm-blog-dynamic/api"
 )
@@ -62,6 +63,7 @@ func (c *connection) receiver(s *Server) {
 		comment, err := s.repo.AddComment(c.path, sanitize(commentData.Author), sanitize(commentData.Comment))
 		if err != nil {
 			s.logger.Println(err)
+			sentry.CaptureException(err)
 			continue
 		}
 		s.logger.Printf("Added comment: %v\n", comment)
