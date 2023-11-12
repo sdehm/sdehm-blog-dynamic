@@ -12,8 +12,10 @@ import (
 
 func main() {
 	err := sentry.Init(sentry.ClientOptions{
-		Dsn:              "https://c5607567d1f2bb6a06f0ac910baaa5fb@o4506211186573312.ingest.sentry.io/4506211186704384",
-		TracesSampleRate: 1.0,
+		Dsn:                "https://c5607567d1f2bb6a06f0ac910baaa5fb@o4506211186573312.ingest.sentry.io/4506211186704384",
+		TracesSampleRate:   1.0,
+		EnableTracing:      true,
+		ProfilesSampleRate: 1.0,
 	})
 	if err != nil {
 		log.Fatalf("sentry.Init: %s", err)

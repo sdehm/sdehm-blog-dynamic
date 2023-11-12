@@ -45,7 +45,7 @@ func NewCockroachConnection(connectionString string, ctx context.Context) (*Cock
 }
 
 func (c *Cockroach) ReconnectIfClosed() error {
-	if (c.conn.IsClosed()) {
+	if c.conn.IsClosed() {
 		log.Default().Println("Connection is closed, reconnecting")
 		conn, err := pgx.ConnectConfig(c.ctx, c.conn.Config())
 		if err != nil {
@@ -70,7 +70,8 @@ func (c *Cockroach) GetPost(path string) (*models.Post, error) {
 	sql := `SELECT p.id, p.path, c.id, c.author, c.body, c.created_at
 			FROM posts p
 			RIGHT JOIN comments c ON p.id = c.post_id
-			WHERE p.path = $1`
+			WHERE p.path = $1
+			ORDER BY c.created_at DESC`
 	rows, err := c.conn.Query(c.ctx, sql, path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get post: %w", err)
