@@ -71,7 +71,7 @@ func (c *Cockroach) GetPost(path string) (*models.Post, error) {
 			FROM posts p
 			RIGHT JOIN comments c ON p.id = c.post_id
 			WHERE p.path = $1
-			ORDER BY c.created_at DESC`
+			ORDER BY c.created_at ASC`
 	rows, err := c.conn.Query(c.ctx, sql, path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get post: %w", err)
