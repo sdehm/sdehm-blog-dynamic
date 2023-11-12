@@ -65,7 +65,7 @@ func (c *connection) receiver(s *Server) {
 			continue
 		}
 		s.logger.Printf("Added comment: %v\n", comment)
-		s.broadcast(api.NewMorph("comment_list", api.RenderComment(*comment)), c.path)
+		s.broadcast(api.NewPrepend("comment_list", api.RenderComment(*comment)), c.path)
 	}
 }
 
