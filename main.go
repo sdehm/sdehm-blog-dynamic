@@ -4,12 +4,21 @@ import (
 	"log"
 	"os"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/sdehm/sdehm-blog-dynamic/data"
 	"github.com/sdehm/sdehm-blog-dynamic/server"
 	"golang.org/x/net/context"
 )
 
 func main() {
+	err := sentry.Init(sentry.ClientOptions{
+		Dsn:              "https://c5607567d1f2bb6a06f0ac910baaa5fb@o4506211186573312.ingest.sentry.io/4506211186704384",
+		TracesSampleRate: 1.0,
+	})
+	if err != nil {
+		log.Fatalf("sentry.Init: %s", err)
+	}
+
 	logger := log.New(log.Writer(), "server: ", log.Flags())
 	// repo := data.NewDataMock()
 	connectionString := os.Getenv("COCKROACH_CONNECTION")
