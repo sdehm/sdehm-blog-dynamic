@@ -20,7 +20,7 @@ require (
 	github.com/getsentry/sentry-go v0.25.0
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.5.0
 	github.com/jackc/pgx/v4 v4.18.1
 	golang.org/x/net v0.19.0
 	golang.org/x/sys v0.15.0 // indirect
