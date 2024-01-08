@@ -2,7 +2,7 @@ module github.com/sdehm/sdehm-blog-dynamic
 
 go 1.21
 
-require github.com/gobwas/ws v1.3.1
+require github.com/gobwas/ws v1.3.2
 
 require (
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
