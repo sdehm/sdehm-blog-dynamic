@@ -1,6 +1,6 @@
 module github.com/sdehm/sdehm-blog-dynamic
 
-go 1.22
+go 1.22.4
 
 require github.com/gobwas/ws v1.4.0
 
